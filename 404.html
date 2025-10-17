@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // If on /pingy/some-topic, redirect to /pingy/ with the path as hash for app use, or reload index.html
+      var path = window.location.pathname.replace(/\/pingy\//, '');
+      if (path) {
+        window.location.replace('/pingy/#/' + path);
+      } else {
+        window.location.replace('/pingy/');
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>
