@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pingy</title>
+</head>
+<body>
+  <h2>Pingy</h2>
+
+  <div>
+    <label>Enter topic name: </label>
+    <input id="topicInput" placeholder="e.g. mychat" />
+    <button onclick="setTopic()">Go</button>
+  </div>
+
+  <h3>Topic: <span id="currentTopic">default</span></h3>
+  
+  <textarea id="message" placeholder="Enter your message" rows="4" cols="50"></textarea><br>
+  <button onclick="sendMessage()">Send</button>
+
+  <h3>Messages</h3>
+  <ul id="messages"></ul>
+
+  <script>
+    let topic = 'default'; // fallback topic
+
+    function updateUI() {
+      document.getElementById('currentTopic').textContent = topic;
+      loadMessages();
+    }
+
+    function setTopic() {
+      const input = document.getElementById('topicInput').value.trim();
+      if (input) {
+        topic = input;
+        updateUI();
+        // Change URL in address bar without page reload
+        history.pushState(null, '', './' + topic);
+      }
+    }
+
+    async function sendMessage() {
+      const msg = document.getElementById('message').value;
+      if (!msg) return;
+      await fetch(`https://search.pingygit.workers.dev/send/${topic}`, {
+        method: 'POST',
+        body: msg,
+      });
+      document.getElementById('message').value = '';
+      loadMessages();
+    }
+
+    async function loadMessages() {
+      const res = await fetch(`https://search.pingygit.workers.dev/get/${topic}`);
+      const messages = await res.json();
+      const list = document.getElementById('messages');
+      list.innerHTML = '';
+      messages.forEach(m => {
+        const li = document.createElement('li');
+        li.textContent = m.message;
+        list.appendChild(li);
+      });
+    }
+
+    // Detect topic from URL path if available
+    const urlParts = window.location.pathname.split('/').filter(Boolean);
+    if (urlParts.length > 0) topic = urlParts[urlParts.length - 1];
+    updateUI();
+
+    setInterval(loadMessages, 5000);
+  </script>
+</body>
+</html>
