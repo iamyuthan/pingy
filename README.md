@@ -1,0 +1,2 @@
+# pingy
+Quick message notification
