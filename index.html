@@ -45,12 +45,19 @@
 
   <script>
     let topic = 'default';
-
-    // AUTO-DETECT topic from URL path on first load
-    (() => {
-      const urlParts = window.location.pathname.split('/').filter(Boolean);
-      if (urlParts.length > 1) topic = urlParts[urlParts.length - 1];
-      document.getElementById('topicInput').value = topic;
+    
+    // Detect topic from hash fragment if available (after redirect)
+    (function () {
+      // Support /pingy/#/test1 or /pingy/#test1
+      let hash = window.location.hash.replace(/^#\/?/, '');
+      if (hash) {
+        topic = hash;
+        document.getElementById('topicInput').value = topic;
+      } else {
+        const urlParts = window.location.pathname.split('/').filter(Boolean);
+        if (urlParts.length > 1) topic = urlParts[urlParts.length - 1];
+        document.getElementById('topicInput').value = topic;
+      }
     })();
 
     function updateUI() {
@@ -58,12 +65,12 @@
       loadMessages();
     }
 
-    function setTopic() {
+     function setTopic() {
       const input = document.getElementById('topicInput').value.trim();
       if (input) {
         topic = input;
         updateUI();
-        history.pushState(null, '', './' + topic);
+        window.location.hash = '/' + topic;
       }
     }
 
