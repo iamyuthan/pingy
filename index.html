@@ -18,6 +18,7 @@
   <button onclick="sendMessage()">Send</button>
 
   <h3>Messages</h3>
+  <button onclick="loadMessages()">Refresh</button>
   <ul id="messages"></ul>
 
   <script>
@@ -51,12 +52,28 @@
 
     async function loadMessages() {
       const res = await fetch(`https://search.pingygit.workers.dev/get/${topic}`);
-      const messages = await res.json();
+      let messages = await res.json();
+    
+      // Show latest at top
+      messages = messages.slice().reverse();
+    
       const list = document.getElementById('messages');
       list.innerHTML = '';
       messages.forEach(m => {
         const li = document.createElement('li');
-        li.textContent = m.message;
+    
+        // Copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = 'Copy';
+        copyBtn.style.marginRight = '8px';
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(m.message);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => copyBtn.textContent = 'Copy', 1000);
+        };
+    
+        li.appendChild(copyBtn);
+        li.appendChild(document.createTextNode(m.message));
         list.appendChild(li);
       });
     }
@@ -66,7 +83,7 @@
     if (urlParts.length > 0) topic = urlParts[urlParts.length - 1];
     updateUI();
 
-    setInterval(loadMessages, 5000);
+    // setInterval(loadMessages, 5000);
   </script>
 </body>
 </html>
