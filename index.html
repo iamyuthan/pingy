@@ -2,27 +2,56 @@
 <html>
 <head>
   <title>Pingy</title>
+  <style>
+    .message-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-family: sans-serif;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 6px 0 0;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .copy-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: #555;
+      transition: fill 0.2s;
+    }
+    .copy-btn.copied svg {
+      fill: #27ae60;
+    }
+  </style>
 </head>
 <body>
   <h2>Pingy</h2>
-
   <div>
     <label>Enter topic name: </label>
     <input id="topicInput" placeholder="e.g. mychat" />
     <button onclick="setTopic()">Go</button>
   </div>
-
-  <h3>Topic: <span id="currentTopic">default</span></h3>
-  
+  <h3>Topic: <span id="currentTopic"></span></h3>
   <textarea id="message" placeholder="Enter your message" rows="4" cols="50"></textarea><br>
   <button onclick="sendMessage()">Send</button>
-
   <h3>Messages</h3>
   <button onclick="loadMessages()">Refresh</button>
-  <ul id="messages"></ul>
+  <div id="messages"></div>
 
   <script>
-    let topic = 'default'; // fallback topic
+    let topic = 'default';
+
+    // AUTO-DETECT topic from URL path on first load
+    (() => {
+      const urlParts = window.location.pathname.split('/').filter(Boolean);
+      if (urlParts.length > 1) topic = urlParts[urlParts.length - 1];
+      document.getElementById('topicInput').value = topic;
+    })();
 
     function updateUI() {
       document.getElementById('currentTopic').textContent = topic;
@@ -34,7 +63,6 @@
       if (input) {
         topic = input;
         updateUI();
-        // Change URL in address bar without page reload
         history.pushState(null, '', './' + topic);
       }
     }
@@ -53,37 +81,34 @@
     async function loadMessages() {
       const res = await fetch(`https://search.pingygit.workers.dev/get/${topic}`);
       let messages = await res.json();
-    
-      // Show latest at top
-      messages = messages.slice().reverse();
-    
+      messages = messages.slice().reverse(); // Latest first
+
       const list = document.getElementById('messages');
       list.innerHTML = '';
       messages.forEach(m => {
-        const li = document.createElement('li');
-    
-        // Copy button
+        const row = document.createElement('div');
+        row.className = 'message-row';
+
         const copyBtn = document.createElement('button');
-        copyBtn.textContent = 'Copy';
-        copyBtn.style.marginRight = '8px';
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML =
+          `<svg viewBox="0 0 16 16"><path d="M3.5 1A1.5 1.5 0 0 0 2 2.5v9A1.5 1.5 0 0 0 3.5 13h8A1.5 1.5 0 0 0 13 11.5v-9A1.5 1.5 0 0 0 11.5 1h-8zM3.5 2h8a.5.5 0 0 1 .5.5V4h-9V2.5a.5.5 0 0 1 .5-.5zm-1 3h10v6.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V5z"/></svg>`;
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(m.message);
-          copyBtn.textContent = 'Copied!';
-          setTimeout(() => copyBtn.textContent = 'Copy', 1000);
+          copyBtn.classList.add('copied');
+          setTimeout(() => copyBtn.classList.remove('copied'), 800);
         };
-    
-        li.appendChild(copyBtn);
-        li.appendChild(document.createTextNode(m.message));
-        list.appendChild(li);
+
+        row.appendChild(copyBtn);
+        const msgText = document.createElement('span');
+        msgText.textContent = m.message;
+        row.appendChild(msgText);
+
+        list.appendChild(row);
       });
     }
 
-    // Detect topic from URL path if available
-    const urlParts = window.location.pathname.split('/').filter(Boolean);
-    if (urlParts.length > 0) topic = urlParts[urlParts.length - 1];
     updateUI();
-
-    // setInterval(loadMessages, 5000);
   </script>
 </body>
 </html>
