@@ -44,7 +44,7 @@
   <div id="messages"></div>
 
   <script>
-    let topic = 'default';
+    let topic = '';
     
     // Detect topic from hash fragment if available (after redirect)
     (function () {
@@ -82,7 +82,7 @@
         body: msg,
       });
       document.getElementById('message').value = '';
-      loadMessages();
+      // loadMessages();
     }
 
     async function loadMessages() {
@@ -115,7 +115,7 @@
       });
     }
 
-    updateUI();
+    // updateUI();
   </script>
 </body>
 </html>
