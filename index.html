@@ -77,7 +77,7 @@
     async function sendMessage() {
       const msg = document.getElementById('message').value;
       if (!msg) return;
-      await fetch(`https://search.pingy.workers.dev/send/${topic}`, {
+      await fetch(`https://search.pingy.ybklab.org/send/${topic}`, {
         method: 'POST',
         body: msg,
       });
@@ -86,7 +86,7 @@
     }
 
     async function loadMessages() {
-      const res = await fetch(`https://search.pingy.workers.dev/get/${topic}`);
+      const res = await fetch(`https://search.pingy.ybklab.org/get/${topic}`);
       let messages = await res.json();
       messages = messages.slice().reverse(); // Latest first
 
